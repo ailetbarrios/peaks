@@ -49,7 +49,6 @@ def make_file():
     # smart meter
     pvIterator = fullPvData.iterrows()
     epIterator = fullEpReader.iterrows()
-    emissionIterator = fullEmissionReader.iterrows()
     counter = 4
     ep = None
     df: DataFrame = DataFrame()
@@ -122,21 +121,12 @@ def make_file():
                 ep = None
                 counter = 4
         # emissions
-        emission_found = False
-        while not emission_found:
-            next_em = next(emissionIterator, [])
-            if not next_em:
-                emission_found = True
-                peak.emission = 0.0
-                continue
-            em = next_em[1]
-            startDate = datetime.strptime(em.startdate, "%Y-%m-%d %H:%M:%S")
-            emission = em.emission
+        for index, em in fullEmissionReader.iterrows():
+            startDate = datetime.strptime(em['startdate'], "%Y-%m-%d %H:%M:%S")
             emDateTime = datetime(startDate.year, startDate.month, startDate.day, startDate.hour, startDate.minute,
                                   tzinfo=timezone.utc)
             if smDateTime == emDateTime:
-                peak.emission = emission
-                emission_found = True
+                peak.emission = em['emission']
         row = ({
             "Start date/time": peak.from_date,
             "End date/time": peak.to_date,
