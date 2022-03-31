@@ -14,10 +14,6 @@ filepath = Path('csv/out.csv')
 filepath.parent.mkdir(parents=True, exist_ok=True)
 global pv_index, ep_index
 
-# emission threshold
-OUTPUT_COLS = ["Start date/time", "End date/time", "Residential load [kW]", "PV generation [kW]",
-               "Electricity price [€/MWh]", "Marginal emission factor [kg CO2eq/MWh]"]
-
 # Readers
 
 # DataFrames
@@ -147,10 +143,10 @@ def make_file():
             "Residential load [kW]": peak.load,
             "PV generation [kW]": peak.pv,
             "Electricity price [€/MWh]": peak.price,
-            "Marginal emission factor [kg CO2eq/kWh]": peak.emission
+            "Marginal emission factor [kg CO2eq/kWh]": peak.emission,
         })
 
-        df = df.append(DataFrame(data=row, columns=OUTPUT_COLS, index=[0]))
+        df = df.append(DataFrame(data=row,  index=[0]))
         # else:
         #     df = DataFrame(data=row, columns=OUTPUT_COLS, index=[0])
 
