@@ -3,6 +3,8 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from time import process_time
 
+from pandas import DataFrame
+
 from Peak import Peak
 
 DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -13,12 +15,10 @@ filepath.parent.mkdir(parents=True, exist_ok=True)
 global pv_index, ep_index
 
 # emission threshold
-EMISSION_FROM: datetime = datetime.strptime("2021-01-20", "%Y-%m-%d")
-EMISSION_TO: datetime = datetime.strptime("2021-01-24", "%Y-%m-%d")
-EMISSION_FACTOR: float = 0.813266583
+OUTPUT_COLS = ["Start date/time", "End date/time", "Residential load [kW]", "PV generation [kW]",
+               "Electricity price [€/MWh]", "Marginal emission factor [kg CO2eq/MWh]"]
 
 # Readers
-
 
 # DataFrames
 
@@ -33,16 +33,9 @@ epReader = pd.read_csv('csv/Day-ahead Prices_202101010000-202201010000.csv', nam
                        header=None, skiprows=1)
 fullEpReader = pd.concat(epReader, ignore_index=True)
 
-fullEmissionReader = pd.concat((pd.read_csv(f, names=["startdate", "enddate", "load", "pv", "price", "emission"], header=None, skiprows=1) for f in [ 'csv/AssB_Input_Group4_winter.csv', 'csv/AssB_Input_Group4_summer.csv']), ignore_index=True)
-
-
-
-# calculates the hardcoded emission value
-def calculate_emission(current: datetime):
-    if EMISSION_FROM.date() < current.date() < EMISSION_TO.date():
-        return EMISSION_FACTOR
-    else:
-        return 0.0
+fullEmissionReader = pd.concat(
+    (pd.read_csv(f, names=["startdate", "enddate", "load", "pv", "price", "emission"], header=None, skiprows=1) for f in
+     ['csv/AssB_Input_Group4_winter.csv', 'csv/AssB_Input_Group4_summer.csv']), ignore_index=True)
 
 
 def to_kw(sumPower):
@@ -63,6 +56,7 @@ def make_file():
     emissionIterator = fullEmissionReader.iterrows()
     counter = 4
     ep = None
+    df: DataFrame = DataFrame()
     for index, sm in fullSmReader.iterrows():
         peak: Peak = Peak()
         day: int = sm['Day']
@@ -123,7 +117,7 @@ def make_file():
                                                      00)
             if startOfHourDateTime == currentDateTime:
                 counter = counter - 1
-                peak.price = price
+                peak.price = to_kw(price)
                 ep_found = True
                 if counter == 0:
                     ep = None
@@ -142,11 +136,27 @@ def make_file():
             em = next_em[1]
             startDate = datetime.strptime(em.startdate, "%Y-%m-%d %H:%M:%S")
             emission = em.emission
-            emDateTime = datetime(startDate.year, startDate.month, startDate.day, startDate.hour, startDate.minute, tzinfo=timezone.utc)
+            emDateTime = datetime(startDate.year, startDate.month, startDate.day, startDate.hour, startDate.minute,
+                                  tzinfo=timezone.utc)
             if smDateTime == emDateTime:
                 peak.emission = emission
                 emission_found = True
+        row = ({
+            "Start date/time": peak.from_date,
+            "End date/time": peak.to_date,
+            "Residential load [kW]": peak.load,
+            "PV generation [kW]": peak.pv,
+            "Electricity price [€/MWh]": peak.price,
+            "Marginal emission factor [kg CO2eq/kWh]": peak.emission
+        })
+
+        df = df.append(DataFrame(data=row, columns=OUTPUT_COLS, index=[0]))
+        # else:
+        #     df = DataFrame(data=row, columns=OUTPUT_COLS, index=[0])
+
         print(str(peak))
+    df.to_csv("csv/output.csv", index=None)
+
 
 start = process_time()
 make_file()
