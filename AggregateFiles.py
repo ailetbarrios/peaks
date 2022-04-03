@@ -33,7 +33,7 @@ fullEmissionReader = pd.concat(
     (pd.read_csv(f, names=["startdate", "enddate", "load", "pv", "price", "emission"], header=None, skiprows=1) for f in
      ['csv/AssB_Input_Group4_winter.csv', 'csv/AssB_Input_Group4_summer.csv']), ignore_index=True)
 
-KEEP_MONTHS = [10,11]
+KEEP_MONTHS = [10,11]  #Simone cambia aca los meses
 
 def to_kw(sumPower):
     return sumPower * 0.001
