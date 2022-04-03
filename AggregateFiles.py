@@ -33,6 +33,7 @@ fullEmissionReader = pd.concat(
     (pd.read_csv(f, names=["startdate", "enddate", "load", "pv", "price", "emission"], header=None, skiprows=1) for f in
      ['csv/AssB_Input_Group4_winter.csv', 'csv/AssB_Input_Group4_summer.csv']), ignore_index=True)
 
+KEEP_MONTHS = [10,11]
 
 def to_kw(sumPower):
     return sumPower * 0.001
@@ -65,6 +66,8 @@ def make_file():
         peak.load = kwValue
         # 01.01.2021 00:00
         smDateTime = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
+        if(smDateTime.month not in KEEP_MONTHS):
+            continue
         # example format: 2018-01-21 00:00:00
         peak.from_date = smDateTime.strftime(DATE_TIME_FORMAT)
         # calculate toDate
