@@ -68,7 +68,7 @@ def make_file():
         peak.load = kwValue
         # 01.01.2021 00:00
         smDateTime = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
-        if(smDateTime.month not in KEEP_MONTHS):
+        if smDateTime.month not in KEEP_MONTHS:
             continue
         # example format: 2018-01-21 00:00:00
         if SEASON.lower() != 'summer':
@@ -79,7 +79,6 @@ def make_file():
             peak.to_date = smDateTime.strftime(DATE_TIME_FORMAT)
 
         # calculate toDate
-        if month not in [7]: continue
         # pv reader
         found: bool = False
         while not found:
