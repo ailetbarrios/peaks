@@ -35,7 +35,7 @@ fullEmissionReader = pd.concat(
     (pd.read_csv(f, names=["startdate", "enddate", "load", "pv", "price", "emission"], header=None, skiprows=1) for f in
      ['csv/AssB_Input_Group4_winter.csv', 'csv/AssB_Input_Group4_summer.csv']), ignore_index=True)
 
-KEEP_MONTHS = [10,11]
+KEEP_MONTHS = [7]
 
 def to_kw(sumPower):
     return round(sumPower * 0.001, 2)
@@ -97,10 +97,6 @@ def make_file():
             if pvDateTime == smDateTime:
                 peak.pv = to_kw(pvSumPower)
                 found = True
-                peak.load = peak.load + peak.pv
-                if peak.load < 0:
-                    peak.load = 0
-
         ep_found: bool = False
 
         # skip head
@@ -139,6 +135,9 @@ def make_file():
                                   tzinfo=timezone.utc)
             if smDateTime == emDateTime:
                 peak.emission = em['emission']
+        peak.load = peak.load + peak.pv
+        if peak.load < 0:
+            peak.load = 0
         row = ({
             "Start date/time": peak.from_date,
             "End date/time": peak.to_date,
