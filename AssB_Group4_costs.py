@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt #for plotting
 """
 Import your input data for the model
 """
-summer = pd.read_csv("Summer_output.csv")
-winter = pd.read_csv("Winter_output.csv")
+summer = pd.read_csv("AssB_Input_Group4_summer.csv")
+winter = pd.read_csv("AssB_Input_Group4_winter.csv")
 
 #for now setting up just for summer as thinking when we make it a function can specify summer or winter
 
@@ -44,7 +44,7 @@ def get_minimal_cost(season):
     #load either summer or winter input variables
     Ppv = season['PV generation [kW]']
     Pdem = season['Residential load [kW]']
-    Celec = season['Electricity price [€/MWh]']
+    Celec = season['Electricity price [euro/kWh]']
     Emis = season['Marginal emission factor [kg CO2eq/kWh]']
     
     # Create Model

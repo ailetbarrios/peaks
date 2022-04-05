@@ -76,7 +76,7 @@ def make_file():
             peak.to_date = smDateTime.strftime(DATE_TIME_FORMAT)
 
         # calculate toDate
-        if month not in [1]: continue
+        if month not in [7]: continue
         # pv reader
         found: bool = False
         while not found:
@@ -95,6 +95,10 @@ def make_file():
             if pvDateTime == smDateTime:
                 peak.pv = to_kw(pvSumPower)
                 found = True
+                peak.load = peak.load + peak.pv
+                if peak.load < 0:
+                    peak.load = 0
+
         ep_found: bool = False
 
         # skip head
