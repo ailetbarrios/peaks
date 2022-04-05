@@ -7,7 +7,9 @@ from pandas import DataFrame
 
 from Peak import Peak
 
-DATE_TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATE_TIME_FORMAT = "%d/%m/%Y %H:%M"
+DATE_TIME_FORMAT_SUMMER = "%Y-%m-%d %H:%M:%S"
+SEASON = "summer"  # cambiame tambien simone [winter or summer]
 CHUNKSIZE = 5000
 
 filepath = Path('csv/out.csv')
@@ -36,11 +38,11 @@ fullEmissionReader = pd.concat(
 KEEP_MONTHS = [10,11]
 
 def to_kw(sumPower):
-    return sumPower * 0.001
+    return round(sumPower * 0.001, 2)
 
 
 def to_price_kw(price):
-    return price * 0.001
+    return round(price * 0.001, 2)
 
 
 def make_file():
@@ -69,11 +71,15 @@ def make_file():
         if(smDateTime.month not in KEEP_MONTHS):
             continue
         # example format: 2018-01-21 00:00:00
-        peak.from_date = smDateTime.strftime(DATE_TIME_FORMAT)
-        # calculate toDate
-        to_date = smDateTime + timedelta(minutes=15)
-        peak.to_date = to_date.strftime(DATE_TIME_FORMAT)
+        if SEASON.lower() != 'summer':
+            peak.from_date = smDateTime.strftime(DATE_TIME_FORMAT_SUMMER)
+            to_date = smDateTime + timedelta(minutes=15)
+            peak.to_date = to_date.strftime(DATE_TIME_FORMAT_SUMMER)
+        else:
+            peak.to_date = smDateTime.strftime(DATE_TIME_FORMAT)
 
+        # calculate toDate
+        if month not in [1]: continue
         # pv reader
         found: bool = False
         while not found:
@@ -135,7 +141,7 @@ def make_file():
             "End date/time": peak.to_date,
             "Residential load [kW]": peak.load,
             "PV generation [kW]": peak.pv,
-            "Electricity price [€/MWh]": peak.price,
+            "Electricity price [euro/kWh]": peak.price,
             "Marginal emission factor [kg CO2eq/kWh]": peak.emission,
         })
 
