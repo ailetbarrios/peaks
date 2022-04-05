@@ -35,7 +35,7 @@ fullEmissionReader = pd.concat(
     (pd.read_csv(f, names=["startdate", "enddate", "load", "pv", "price", "emission"], header=None, skiprows=1) for f in
      ['csv/AssB_Input_Group4_winter.csv', 'csv/AssB_Input_Group4_summer.csv']), ignore_index=True)
 
-KEEP_MONTHS = [10,11]  #Simone cambia aca los meses
+KEEP_MONTHS = [7]  #Simone cambia aca los meses
 
 def to_kw(sumPower):
     return round(sumPower * 0.001, 2)
@@ -65,7 +65,7 @@ def make_file():
         sumPower: float = sm["SumPower"]
         # Residential load
         kwValue: float = to_kw(sumPower)
-        peak.load = kwValue
+        peak.load = kwValue 
         # 01.01.2021 00:00
         smDateTime = datetime(year, month, day, hour, minute, tzinfo=timezone.utc)
         if(smDateTime.month not in KEEP_MONTHS):
@@ -97,7 +97,13 @@ def make_file():
             pvDateTime = datetime(pvYear, pvMonth, pvDay, pvHour, pvMinute, tzinfo=timezone.utc)
             if pvDateTime == smDateTime:
                 peak.pv = to_kw(pvSumPower)
-                found = True
+                # peak.load = peak.pv + peak.load
+            ##comment me simone  
+            peak.load = peak.pv + peak.load
+            if peak.load < 0:
+             #negative
+             peak.load = 0
+            found = True
         ep_found: bool = False
 
         # skip head
