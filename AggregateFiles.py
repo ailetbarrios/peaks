@@ -137,7 +137,7 @@ def make_file():
                 peak.emission = em['emission']
         peak.load = peak.load + peak.pv
         if peak.load < 0:
-            peak.load = 0
+            peak.load = 0.0000000001
         row = ({
             "Start date/time": peak.from_date,
             "End date/time": peak.to_date,
