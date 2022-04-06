@@ -38,11 +38,11 @@ fullEmissionReader = pd.concat(
 KEEP_MONTHS = [7]
 
 def to_kw(sumPower):
-    return round(sumPower * 0.001, 2)
+    return round(sumPower * 0.001, 5)
 
 
 def to_price_kw(price):
-    return round(price * 0.001, 2)
+    return round(price * 0.001, 5)
 
 
 def make_file():
@@ -137,7 +137,7 @@ def make_file():
                 peak.emission = em['emission']
         peak.load = peak.load + peak.pv
         if peak.load < 0:
-            peak.load = 0.0000000001
+            peak.load = 0.0000001
         row = ({
             "Start date/time": peak.from_date,
             "End date/time": peak.to_date,
@@ -148,8 +148,6 @@ def make_file():
         })
 
         df = df.append(DataFrame(data=row,  index=[0]))
-        # else:
-        #     df = DataFrame(data=row, columns=OUTPUT_COLS, index=[0])
 
         print(str(peak))
     df.to_csv("csv/output.csv", index=None)
